@@ -30,7 +30,7 @@ app.layout = html.Div(children=[html.H1('SpaceX Launch Records Dashboard',
 html.Br(),
 
 html.Div(dcc.Graph(id='success-pie-chart')),
-html.Br()
+html.Br(),
 
 html.P("Payload range (Kg):"),
 
@@ -43,33 +43,34 @@ dcc.RangeSlider(id='payload-slider',
 html.Div(dcc.Graph(id='success-payload-scatter-chart')),
 ])
 
-@app.callback(Input(component_id='site-dropdown',
+@app.callback(Output(component_id='success-pie-chart',
+ component_property='figure'),
+    Input(component_id='site-dropdown',
  component_property='value'),
-             Output(component_id='success-pie-chart',
- component_property='figure'))
+             )
 def get_pie_chart(entered_site):
     filtered_df = spacex_df
     if entered_site == "ALL":
         fig = px.pie(filtered_df, values='class',
-        names='Launch Site',
-        title='Success Count for All Launch Sites')
+        	names='Launch Site',
+        	title='Success Count for All Launch Sites')
         return fig
     else:
         filtered_df = spacex_df[spacex_df['Launch Site']== entered_site]
         filtered_df = filtered_df.groupby(['Launch Site', 'class']).size().reset_index(name='class count')
         fig = px.pie(filtered_df, values='class count',
-        names='class',
-        title="Total Success Launches for Site {entered_site}")
+        	names='class',
+     		title="Total Success Launches for Site {entered_site}")
         return fig
         # return the outcomes piechart for a selected site
 
 
-@app.callback([Input(component_id='site-dropdown',
+@app.callback(Output(component_id='success-payload-scatter-chart',
+ component_property='figure'), [Input(component_id='site-dropdown',
  component_property='value'),
             Input(component_id="payload-slider",
  component_property='value')],
-             Output(component_id='success-payload-scatter-chart',
- component_property='figure'))
+             )
 
  def scatter(entered_site, payload):
      filtered_df = spacex_df[spacex_df['Payload Mass (kg)'].between(payload[0], payload[1])]
